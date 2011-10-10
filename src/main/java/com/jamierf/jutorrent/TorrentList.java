@@ -90,7 +90,7 @@ public class TorrentList extends HashMap<String, Torrent> {
 		identifier = (String) map.get("torrentc");
 	}
 
-	void onAdded(final Torrent torrent, List<Object> fields) {
+	private void onAdded(final Torrent torrent, List<Object> fields) {
 		// Update first otherwise we wont have a name!
 		torrent.update(fields);
 
@@ -114,7 +114,7 @@ public class TorrentList extends HashMap<String, Torrent> {
 		this.handleStatusChange(torrent, torrent.getStatusCode());
 	}
 
-	void onUpdate(Torrent torrent, List<Object> fields) {
+	private void onUpdate(Torrent torrent, List<Object> fields) {
 		// Note the old status code to check for changes
 		final int oldStatus = torrent.getStatusCode();
 		final boolean oldCompleted = torrent.isCompleted();
