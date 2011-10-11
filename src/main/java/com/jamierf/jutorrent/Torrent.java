@@ -83,6 +83,10 @@ public class Torrent {
 		this.remaining = (Long) fields.get(FIELD_REMAINING);
 	}
 
+	public String getHash() {
+		return hash;
+	}
+
 	public int getStatusCode() {
 		return status;
 	}
@@ -121,6 +125,10 @@ public class Torrent {
 
 	public boolean isCompleted() {
 		return progress >= 100;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public long getSize() {
@@ -188,27 +196,27 @@ public class Torrent {
 	}
 
 	public void start(boolean force) {
-		utorrent.call(String.format(ACTION_CALL, force ? "forcestart" : "start", hash));
+		utorrent.get(String.format(ACTION_CALL, force ? "forcestart" : "start", hash));
 	}
 
 	public void stop() {
-		utorrent.call(String.format(ACTION_CALL, "stop", hash));
+		utorrent.get(String.format(ACTION_CALL, "stop", hash));
 	}
 
 	public void pause() {
-		utorrent.call(String.format(ACTION_CALL, "pause", hash));
+		utorrent.get(String.format(ACTION_CALL, "pause", hash));
 	}
 
 	public void unpause() {
-		utorrent.call(String.format(ACTION_CALL, "unpause", hash));
+		utorrent.get(String.format(ACTION_CALL, "unpause", hash));
 	}
 
 	public void recheck() {
-		utorrent.call(String.format(ACTION_CALL, "recheck", hash));
+		utorrent.get(String.format(ACTION_CALL, "recheck", hash));
 	}
 
 	public void remove(boolean removeData) {
-		utorrent.call(String.format(ACTION_CALL, removeData ? "removedata" : "remove", hash));
+		utorrent.get(String.format(ACTION_CALL, removeData ? "removedata" : "remove", hash));
 	}
 
 	// TODO: Files

@@ -1,5 +1,6 @@
 package com.jamierf.jutorrent;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -12,9 +13,15 @@ import java.util.regex.Pattern;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.HttpVersion;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.multipart.FilePart;
+import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
+import org.apache.commons.httpclient.methods.multipart.Part;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
@@ -33,18 +40,20 @@ public class UTorrent {
 
 	public UTorrent(InetSocketAddress address, String username, String password, int delay) {
 		client = new HttpClient();
+		client.getParams().setParameter(HttpMethodParams.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
 		client.getState().setCredentials(new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT, AuthScope.ANY_REALM), new UsernamePasswordCredentials(username, password));
 
 		baseURL = "http://" + address.getHostString() + ":" + address.getPort() + "/gui/";
 		token = this.getToken();
 
 		torrents = new TorrentList(this, Executors.newCachedThreadPool());
+		torrents.update();
 
 		Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(new Runnable() {
 			public void run() {
 				torrents.update();
 			}
-		}, 0, delay, TimeUnit.SECONDS);
+		}, delay, delay, TimeUnit.SECONDS);
 	}
 
 	public void addListener(TorrentListener listener) {
@@ -55,7 +64,7 @@ public class UTorrent {
 		torrents.removeListener(listener);
 	}
 
-	String call(String query) {
+	String get(String query) {
 		final HttpMethod request = new GetMethod(baseURL + "?token=" + token + "&" + query);
 		return this.call(request);
 	}
@@ -99,7 +108,7 @@ public class UTorrent {
 
 	@SuppressWarnings("unchecked")
 	Map<String, Object> getMap(String query) {
-		final String result = this.call(query);
+		final String result = this.get(query);
 		final JSONParser parser = new JSONParser();
 
 		try {
@@ -122,5 +131,20 @@ public class UTorrent {
 
 	public Map<String, Torrent> getTorrents() {
 		return torrents;
+	}
+
+	public Torrent addTorrent(TorrentFile file) throws FileNotFoundException {
+		final Part[] parts = {
+			new FilePart("torrent_file", file)
+		};
+
+		final PostMethod request = new PostMethod(baseURL + "?token=" + token + "&" + "action=add-file");
+		request.setRequestEntity(new MultipartRequestEntity(parts, request.getParams()));
+
+		this.call(request);
+
+
+
+		return null; // TODO
 	}
 }
