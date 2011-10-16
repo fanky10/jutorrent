@@ -10,18 +10,20 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.HttpVersion;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.multipart.FilePart;
-import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
-import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.HttpVersion;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.util.EntityUtils;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
@@ -39,9 +41,13 @@ public class UTorrent {
 	private final TorrentList torrents;
 
 	public UTorrent(InetSocketAddress address, String username, String password, int delay) {
-		client = new HttpClient();
-		client.getParams().setParameter(HttpMethodParams.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
-		client.getState().setCredentials(new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT, AuthScope.ANY_REALM), new UsernamePasswordCredentials(username, password));
+		client = new DefaultHttpClient();
+
+		// Use HTTP 1.1
+		client.getParams().setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
+
+		// Authentication
+		((DefaultHttpClient) client).getCredentialsProvider().setCredentials(new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT, AuthScope.ANY_REALM), new UsernamePasswordCredentials(username, password));
 
 		baseURL = "http://" + address.getHostString() + ":" + address.getPort() + "/gui/";
 		token = this.getToken();
@@ -65,17 +71,17 @@ public class UTorrent {
 	}
 
 	String get(String query) {
-		final HttpMethod request = new GetMethod(baseURL + "?token=" + token + "&" + query);
+		final HttpRequestBase request = new HttpGet(baseURL + "?token=" + token + "&" + query);
 		return this.call(request);
 	}
 
-	private synchronized String call(HttpMethod request) {
+	private synchronized String call(HttpRequestBase request) {
 		try {
-			final int result = client.executeMethod(request);
-			if (result != HttpStatus.SC_OK)
-				throw new IOException("Receied non-OK response code " + result + " for URI: " + request.getURI());
+			final HttpResponse response = client.execute(request);
+			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
+				throw new IOException("Receied non-OK response code for URI: " + request.getURI());
 
-			return request.getResponseBodyAsString();
+			return EntityUtils.toString(response.getEntity());
 		}
 		catch (IOException e) {
 			if (logger.isWarnEnabled())
@@ -83,13 +89,10 @@ public class UTorrent {
 
 			return null;
 		}
-		finally {
-			request.releaseConnection();
-		}
 	}
 
 	private String getToken() {
-		final String result = this.call(new GetMethod(baseURL + "token.html"));
+		final String result = this.call(new HttpGet(baseURL + "token.html"));
 
 		final Pattern regex = Pattern.compile(">([^<]+)<");
 		final Matcher matcher = regex.matcher(result);
@@ -137,12 +140,12 @@ public class UTorrent {
 	}
 
 	void _addTorrent(TorrentFile file) throws FileNotFoundException {
-		final Part[] parts = {
-			new FilePart("torrent_file", file)
-		};
+		final HttpPost request = new HttpPost(baseURL + "?token=" + token + "&" + "action=add-file");
 
-		final PostMethod request = new PostMethod(baseURL + "?token=" + token + "&" + "action=add-file");
-		request.setRequestEntity(new MultipartRequestEntity(parts, request.getParams()));
+		final MultipartEntity entity = new MultipartEntity();
+		entity.addPart("torrent_file", new FileBody(file));
+
+		request.setEntity(entity);
 
 		this.call(request);
 		torrents.update();
