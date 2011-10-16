@@ -26,11 +26,18 @@ class TorrentAdder {
 			}
 		};
 
-		result = null;
+		// Check if this torrent is already added...
+		result = utorrent.getTorrents().get(file.getHash());
 
-		utorrent.addListener(listener);
+		// This torrent doesn't already exist, lets add it
+		if (result == null) {
+			utorrent.addListener(listener);
 
-		utorrent._addTorrent(file);
+			utorrent._addTorrent(file);
+		}
+		// The torrent already exists so skip adding it
+		else
+			latch.countDown();
 	}
 
 	public Torrent get() {
