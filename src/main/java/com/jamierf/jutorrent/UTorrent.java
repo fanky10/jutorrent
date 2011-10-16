@@ -71,22 +71,20 @@ public class UTorrent {
 
 	private synchronized String call(HttpMethod request) {
 		try {
-			try {
-				final int result = client.executeMethod(request);
-				if (result != HttpStatus.SC_OK)
-					throw new IOException("Receied non-OK response code " + result + " for URI: " + request.getURI());
+			final int result = client.executeMethod(request);
+			if (result != HttpStatus.SC_OK)
+				throw new IOException("Receied non-OK response code " + result + " for URI: " + request.getURI());
 
-				return request.getResponseBodyAsString();
-			}
-			finally {
-				request.releaseConnection();
-			}
+			return request.getResponseBodyAsString();
 		}
 		catch (IOException e) {
 			if (logger.isWarnEnabled())
 				logger.warn("Failed to call web API", e);
 
 			return null;
+		}
+		finally {
+			request.releaseConnection();
 		}
 	}
 
@@ -134,6 +132,11 @@ public class UTorrent {
 	}
 
 	public Torrent addTorrent(TorrentFile file) throws FileNotFoundException {
+		final TorrentAdder adder = new TorrentAdder(this, file);
+		return adder.get();
+	}
+
+	void _addTorrent(TorrentFile file) throws FileNotFoundException {
 		final Part[] parts = {
 			new FilePart("torrent_file", file)
 		};
@@ -142,9 +145,6 @@ public class UTorrent {
 		request.setRequestEntity(new MultipartRequestEntity(parts, request.getParams()));
 
 		this.call(request);
-
-
-
-		return null; // TODO
+		torrents.update();
 	}
 }
