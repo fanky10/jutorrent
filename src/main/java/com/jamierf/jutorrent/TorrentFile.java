@@ -80,6 +80,10 @@ public class TorrentFile extends File {
 	private final Collection<Chunk> chunks;
 	private final long size;
 
+	public TorrentFile(File file) throws IOException {
+		this (file.getAbsolutePath());
+	}
+
 	public TorrentFile(String pathname) throws IOException {
 		super (pathname);
 
