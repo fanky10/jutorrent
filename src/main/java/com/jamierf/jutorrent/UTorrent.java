@@ -47,9 +47,9 @@ public class UTorrent {
 		client.getParams().setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
 
 		// Authentication
-		((DefaultHttpClient) client).getCredentialsProvider().setCredentials(new AuthScope(address.getHostString(), address.getPort(), AuthScope.ANY_REALM), new UsernamePasswordCredentials(username, password));
+		((DefaultHttpClient) client).getCredentialsProvider().setCredentials(new AuthScope(address.getAddress().getHostAddress(), address.getPort(), AuthScope.ANY_REALM), new UsernamePasswordCredentials(username, password));
 
-		baseURL = "http://" + address.getHostString() + ":" + address.getPort() + "/gui/";
+		baseURL = "http://" + address.getAddress().getHostAddress() + ":" + address.getPort() + "/gui/";
 		token = this.getToken();
 
 		torrents = new TorrentList(this, Executors.newCachedThreadPool());
