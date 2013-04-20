@@ -1,4 +1,4 @@
-package com.jamierf.jutorrent;
+package com.fanky10.jutorrent;
 
 public class SimpleTorrentListener implements TorrentListener {
 

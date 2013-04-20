@@ -2,33 +2,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.jamierf</groupId>
+	<groupId>com.fanky10</groupId>
 	<artifactId>jutorrent</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<url>https://github.com/reines/jutorrent</url>
+	<url>https://github.com/fanky10/jutorrent</url>
 
 	<issueManagement>
-		<url>https://github.com/reines/jutorrent/issues</url>
+		<url>https://github.com/fanky10/jutorrent/issues</url>
 		<system>GitHub Issues</system>
 	</issueManagement>
 
 	<scm>
-		<url>https://github.com/reines/jutorrent</url>
-		<connection>scm:git:git://github.com/reines/jutorrent.git</connection>
-		<developerConnection>scm:git:git@github.com:reines/jutorrent.git</developerConnection>
+		<url>https://github.com/fanky10/jutorrent</url>
+		<connection>scm:git:git://github.com/fanky10/jutorrent.git</connection>
+		<developerConnection>scm:git:git@github.com:fanky10/jutorrent.git</developerConnection>
 	</scm>
-
-	<distributionManagement>
-		<repository>
-			<id>jamierf-release</id>
-			<url>http://robin.jamierf.co.uk:8081/nexus/content/repositories/releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>jamierf-snapshot</id>
-			<url>http://robin.jamierf.co.uk:8081/nexus/content/repositories/snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
-
+	
 	<dependencies>
 		<dependency>
 			<groupId>commons-lang</groupId>
@@ -55,11 +44,6 @@
 			<artifactId>json-simple</artifactId>
 			<version>1.1</version>
 			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ardverk</groupId>
-			<artifactId>bee-encode</artifactId>
-			<version>0.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>

@@ -1,4 +1,4 @@
-package com.jamierf.jutorrent;
+package com.fanky10.jutorrent;
 
 import java.util.ArrayList;
 import java.util.HashMap;

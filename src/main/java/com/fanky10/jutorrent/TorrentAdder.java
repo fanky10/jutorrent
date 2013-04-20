@@ -1,4 +1,4 @@
-package com.jamierf.jutorrent;
+package com.fanky10.jutorrent;
 
 import java.io.FileNotFoundException;
 import java.util.concurrent.CountDownLatch;
